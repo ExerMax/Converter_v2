@@ -1,4 +1,4 @@
-﻿namespace Converter_v2
+﻿namespace Converter_v2.src
 {
     public class Converter : IConverter
     {
@@ -17,7 +17,7 @@
         {
             decimal coefficient1 = _rates[value.Name];
 
-            if(coefficient1 == 0)
+            if (coefficient1 == 0)
             {
                 throw new ArgumentException("Cannot find currency", value.Name);
             }

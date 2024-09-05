@@ -1,4 +1,4 @@
-﻿namespace Converter_v2
+﻿namespace Converter_v2.src
 {
     public interface IConverter
     {
