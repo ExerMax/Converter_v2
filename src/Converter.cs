@@ -2,38 +2,41 @@
 {
     public class Converter : IConverter
     {
-        //Rates must be relative to a third currency with rate = 1
-        //For example   { { "USD", 1 }, { "RUB", 100 }, { "AAA", 0.12345M } }
-        //Or            { { "RUB", 100 }, { "AAA", 0.12345M } }
-        //In this case it is implied that currencies will be converted relative to { "USD", 1 }
-        private readonly IDictionary<string, decimal> _rates;
+        private readonly List<Rate> _rates;
 
-        public Converter(IDictionary<string, decimal> rates)
+        public Converter(List<Rate> rates)
         {
             _rates = rates;
         }
 
         public Amount Convert(Amount value, string currency)
         {
-            decimal coefficient1 = _rates[value.Name];
+            decimal res = value.Value * FindRate(value.Name, currency);
 
-            if (coefficient1 == 0)
+            return new Amount { Value = res, Name = currency };
+        }
+
+        private decimal FindRate(string name1, string name2)
+        {
+            Rate? rate = _rates.FirstOrDefault(r => r.Currency1 == name1 && r.Currency2 == name2);
+
+            if(rate is null)
             {
-                throw new ArgumentException("Cannot find currency", value.Name);
+                rate = _rates.FirstOrDefault(r => r.Currency1 == name2 && r.Currency2 == name1);
+
+                if (rate is null)
+                {
+                    return 0;
+                }
+                else
+                {
+                    return 1M / rate.GetValueOrDefault().Value;
+                }
             }
-
-            decimal coefficient2 = _rates[currency];
-
-            if (coefficient2 == 0)
+            else
             {
-                throw new ArgumentException("Cannot find currency", currency);
+                return rate.GetValueOrDefault().Value;
             }
-
-            decimal res = value.Value / coefficient1 * coefficient2;
-
-            Amount resAmount = new Amount { Value = res, Name = currency };
-
-            return resAmount;
         }
     }
 }
